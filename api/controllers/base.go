@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/gorilla/mux"
 	"github.com/jinzhu/gorm"
@@ -68,6 +69,7 @@ func (server *Server) Run(addr string) {
         AllowCredentials: true,
     })
 	handler := c.Handler(server.Router)
-	fmt.Println("Listening to port 8000")
+	url := os.Getenv("App_URL")
+	fmt.Println(" and Listening to port", url)
 	log.Fatal(http.ListenAndServe(addr, handler))
 }
