@@ -7,6 +7,7 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/jinzhu/gorm"
+	"github.com/rs/cors"
 
 	"github.com/genresos/apotek-go/api/models"
 	_ "github.com/jinzhu/gorm/dialects/mysql"    //mysql database driver
@@ -18,7 +19,6 @@ type Server struct {
 	DB     *gorm.DB
 	Router *mux.Router
 }
-
 func (server *Server) Initialize(Dbdriver, DbUser, DbPassword, DbPort, DbHost, DbName string) {
 
 	var err error
@@ -58,11 +58,16 @@ func (server *Server) Initialize(Dbdriver, DbUser, DbPassword, DbPort, DbHost, D
 	server.DB.Debug().AutoMigrate(&models.User{}, &models.Post{}) //database migration
 
 	server.Router = mux.NewRouter()
-
+	
 	server.initializeRoutes()
 }
 
 func (server *Server) Run(addr string) {
+	c := cors.New(cors.Options{
+        AllowedOrigins: []string{"http://localhost:3000"},
+        AllowCredentials: true,
+    })
+	handler := c.Handler(server.Router)
 	fmt.Println("Listening to port 8000")
-	log.Fatal(http.ListenAndServe(addr, server.Router))
+	log.Fatal(http.ListenAndServe(addr, handler))
 }

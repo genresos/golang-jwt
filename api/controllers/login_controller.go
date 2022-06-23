@@ -3,6 +3,7 @@ package controllers
 import (
 	"encoding/json"
 	"io/ioutil"
+	"log"
 	"net/http"
 
 	"github.com/genresos/apotek-go/api/auth"
@@ -32,16 +33,20 @@ func (server *Server) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	token, err := server.SignIn(user.Email, user.Password)
+	user_info :=  server.DB.Debug().Where("email = ?", user.Email).First(&user)
 	if err != nil {
 		formattedError := formaterror.FormatError(err.Error())
 		responses.ERROR(w, http.StatusUnprocessableEntity, formattedError)
 		return
 	}
+	// apage := uint32(user.Person_ID)
+	log.Printf("%+v", user.Emp_ID)
 	data := map[string]interface{}{
+		"status": "ok",
 		"token": token,
-		"users": user,
+		"user": user_info.Value,
 	}
-	responses.JSON(w, http.StatusOK, data)
+	responses.LOGINJSON(w, http.StatusOK, data)
 }
 
 func (server *Server) SignIn(email, password string) (string, error) {
